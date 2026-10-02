@@ -1,0 +1,156 @@
+/* ==========================================
+   1. CSS Variables (:root Light Theme)
+   ========================================== */
+:root {
+    --bg-color: #f4f6f8;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --border-color: #cccccc;
+    --primary-color: #3498db;
+    --primary-hover: #2980b9;
+    --header-bg: #2c3e50;
+    --header-text: #ffffff;
+    --warning-color: #e67e22;
+    --over-color: #e74c3c;
+}
+
+/* ==========================================
+   2. Dark Theme Variable Overrides
+   ========================================== */
+body.dark {
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-color: #f0f0f0;
+    --border-color: #444444;
+    --primary-color: #2980b9;
+    --primary-hover: #3498db;
+    --header-bg: #111111;
+    --header-text: #f0f0f0;
+    --warning-color: #f39c12;
+    --over-color: #ff6b6b;
+}
+
+/* ==========================================
+   3. Base Styles & Layout
+   ========================================== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    max-width: 700px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    flex: 1;
+}
+
+.editor-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+textarea:focus {
+    outline: 2px solid var(--primary-color);
+}
+
+.counter-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+}
+
+/* ==========================================
+   4. Counter State Classes
+   ========================================== */
+.warning {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.over {
+    color: var(--over-color);
+    font-weight: bold;
+}
+
+/* ==========================================
+   5. Buttons & Actions
+   ========================================== */
+.actions {
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+}
