@@ -73,50 +73,45 @@ Photo files (originals and thumbnails) belong in an **Object Storage Service** (
 
 ## 4. System Architecture Diagram
 
-+-------------------------------+
-|  Client Browser / Mobile App  |
-+-------------------------------+
-       |                 |
-       | (Static Media)  | (API Requests)
-       v                 v
-   +-------+     +---------------+
-   |  CDN  |     | Load Balancer |
-   +-------+     +---------------+
-       |                 |
-       |          +------+------+
-       |          |             |
-       |          v             v
-       |    +-----------+ +-----------+
-       |    | App Server| | App Server|
-       |    +-----------+ +-----------+
-       |          |             |
-       |          +------+------+
-       |                 |
-       |    +------------+------------+
-       |    |            |            |
-       v    v            v            v
-  +--------------+  +---------+  +---------------+
-  | Object Store |  | Cache   |  | Message Queue |
-  |   (S3)       |  | (Redis) |  |   (SQS)       |
-  +--------------+  +---------+  +---------------+
-         ^                               |
-         | (Saves Thumbnail)             v
-         +--------------------- +---------------+
-                                | Async Worker  |
-                                +---------------+
-                                        |
-                                        v
-                        +-------------------------------+
-                        |   Database Primary (Writes)   |
-                        +-------------------------------+
-                                        |
-                               (Replication Stream)
-                                        v
-                        +-------------------------------+
-                        |   Database Replica (Reads)    |
-                        +-------------------------------+
-        
----
+```mermaid
+flowchart TD
+    Client["Client Browser / Mobile App"]
+    CDN["Content Delivery Network (CDN)"]
+    LB["Load Balancer"]
+    App1["App Server 1"]
+    App2["App Server 2"]
+    ObjStore["Object Storage (S3 / Blob)"]
+    Cache["In-Memory Cache (Redis)"]
+    Queue["Message Queue (SQS / RabbitMQ)"]
+    Worker["Async Worker"]
+    DBPrimary[("Primary Database (Writes)")]
+    DBReplica[("Read Replica (Reads)")]
+
+    Client -->|Static Media| CDN
+    Client -->|API Requests| LB
+    LB --> App1
+    LB --> App2
+
+    App1 --> ObjStore
+    App2 --> ObjStore
+
+    App1 --> Cache
+    App2 --> Cache
+
+    App1 --> Queue
+    App2 --> Queue
+
+    Queue --> Worker
+    Worker -->|Saves Thumbnail| ObjStore
+    Worker --> DBPrimary
+
+    App1 --> DBPrimary
+    App2 --> DBPrimary
+
+    DBPrimary -->|Replication Stream| DBReplica
+    App1 .->|Read Queries| DBReplica
+    App2 .->|Read Queries| DBReplica
+```
 
 ## 5. Component Responsibilities
 

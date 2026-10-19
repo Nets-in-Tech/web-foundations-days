@@ -79,50 +79,38 @@ To guarantee that two users can never successfully purchase the same seat, Ticke
 
 ## 6. Architecture Diagram & Surviving the Big Sale
 
-+-------------------------------------------------------+
-|              Client (Web / Mobile App)                |
-+-------------------------------------------------------+
-                            |
-                            v
-+-------------------------------------------------------+
-|          Cloudflare CDN & Edge DDoS Protection        |
-+-------------------------------------------------------+
-                            |
-                            v
-+-------------------------------------------------------+
-|             Virtual Waiting Room (Queue)              |
-+-------------------------------------------------------+
-                            |
-                            v
-+-------------------------------------------------------+
-|               Application Load Balancer               |
-+-------------------------------------------------------+
-                            |
-           +----------------+----------------+
-           |                                 |
-           v                                 v
-+-----------------------+         +-----------------------+
-|    App Server 1       |         |    App Server 2       |
-+-----------------------+         +-----------------------+
-           |                                 |
-           +----------------+----------------+
-                            |
-       +--------------------+--------------------+
-       |                    |                    |
-       v                    v                    v
-+--------------+    +---------------+    +-----------------+
-| Redis Cache  |    | Message Queue |    | Primary DB      |
-| (Seat Status)|    | (Async Orders)|    | (ACID Writes)   |
-+--------------+    +---------------+    +-----------------+
-                                                  |
-                                         (Replication Stream)
-                                                  |
-                                                  v
-                                         +-----------------+
-                                         | Read Replica    |
-                                         | (Event Catalog) |
-                                         +-----------------+
+```mermaid
+flowchart TD
+    Client["Client (Web / Mobile App)"]
+    CDN["Cloudflare CDN & Edge DDoS Protection"]
+    QueueRoom["Virtual Waiting Room (Queue)"]
+    LB["Application Load Balancer"]
+    App1["App Server 1"]
+    App2["App Server 2"]
+    Redis["Redis Cache (Seat Status / Locks)"]
+    MsgQueue["Message Queue (Async Orders)"]
+    DBPrimary[("Primary Database (ACID Writes)")]
+    DBReplica[("Read Replica (Event Catalog)")]
 
+    Client --> CDN
+    CDN --> QueueRoom
+    QueueRoom --> LB
+    LB --> App1
+    LB --> App2
+
+    App1 --> Redis
+    App2 --> Redis
+
+    App1 --> MsgQueue
+    App2 --> MsgQueue
+
+    App1 --> DBPrimary
+    App2 --> DBPrimary
+
+    DBPrimary -->|Replication Stream| DBReplica
+    App1 .->|Read Catalog| DBReplica
+    App2 .->|Read Catalog| DBReplica
+```
 ### Component Explanations
 * **CDN:** Caches static assets and event catalog pages at global edge locations to offload traffic from core servers.
 * **Virtual Waiting Room:** Throttles incoming checkout traffic during popular ticket drops, admitting users in orderly batches to prevent server overload.
